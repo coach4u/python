@@ -1,0 +1,48 @@
+'''This is for making the bucket which are there in while list makes it public and which are not there will make it private '''
+
+
+
+#!/bin/python3
+import boto3
+import sys,os
+import subprocess
+
+def PublicAccessBlockConfiguration(bucket_name):
+   client = boto3.client('s3')
+   response = client.put_public_access_block(
+    Bucket=bucket_name,
+    PublicAccessBlockConfiguration={
+        'BlockPublicAcls': False,
+        'IgnorePublicAcls': False,
+        'BlockPublicPolicy': False,
+        'RestrictPublicBuckets': False
+  }
+ )
+
+def PrivateAccessBlockConfiguration(bucket_name):
+   client = boto3.client('s3')
+   response = client.put_public_access_block(
+    Bucket=bucket_name,
+    PublicAccessBlockConfiguration={
+        'BlockPublicAcls': True,
+        'IgnorePublicAcls': True,
+        'BlockPublicPolicy': True,
+        'RestrictPublicBuckets': True
+  }
+)
+
+
+subprocess.call('/usr/bin/aws s3 cp s3://srikanth04321/whitelist /tmp/whitelist',shell=True)
+f1=open("/tmp/whitelist","r")
+s3 = boto3.client('s3')
+for line in f1:
+   buckets = s3.list_buckets()
+   for bucket in buckets['Buckets']:
+      print("Bucket Name :" + bucket['Name'])
+      bucket_name= bucket['Name']
+      if bucket_name in line:
+         print(bucket_name + " bucket exist in whitelist")
+         PublicAccessBlockConfiguration(bucket_name)
+         print(bucket_name + " is made public")
+         print("----------------------")
+
